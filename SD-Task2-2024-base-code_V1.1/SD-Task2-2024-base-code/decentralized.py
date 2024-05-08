@@ -7,6 +7,8 @@ import socket
 proto_dir = os.path.join(os.path.dirname(__file__), 'proto')
 sys.path.append(proto_dir)
 #python -m grpc_tools.protoc -I./ --python_out=. --grpc_python_out=. ./store.proto
+#python .\eval\decentralized_system_tests.py
+#python .\decentralized.py
 import store_pb2
 import store_pb2_grpc
 import yaml 
