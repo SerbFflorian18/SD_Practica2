@@ -2,20 +2,25 @@ syntax = "proto3";
 
 package distributedstore;
 
+message NodeInfo {
+  int32 id = 1;
+  string ip = 2;
+  int32 port = 3;
+}
+
 service KeyValueStore {
   rpc put(PutRequest) returns (PutResponse);
-
   rpc get(GetRequest) returns (GetResponse);
-
   rpc slowDown(SlowDownRequest) returns (SlowDownResponse);
-
   rpc restore(RestoreRequest) returns (RestoreResponse);
-
+  rpc registerNode(NodeInfo) returns (Response);
+  rpc canCommit(CanCommitRequest) returns (Response);
+  rpc doCommit(DoCommitRequest) returns (Response);
 }
 
 message PutRequest {
   string key = 1;
-  string value = 2;
+  optional string value = 2;
 }
 
 message PutResponse {
@@ -45,6 +50,17 @@ message RestoreResponse {
   bool success = 1;
 }
 
-message Empty {
-    
+message Empty {}
+
+message CanCommitRequest {
+  string key = 1;
+}
+
+message DoCommitRequest {
+  string key = 1;
+  string value = 2;
+}
+
+message Response {
+  bool success = 1;
 }
