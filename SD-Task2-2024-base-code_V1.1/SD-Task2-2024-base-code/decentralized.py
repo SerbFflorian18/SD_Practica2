@@ -80,7 +80,7 @@ def main():
     nodes = [f"{node['ip']}:{node['port']}" for node in config['nodes']]
 
     # Obtener el puerto del primer nodo para que el servidor escuche
-    port = 50055  # Cambiar el puerto predeterminado a localhost
+    port = 50051  # Puerto por defecto
 
     serve(node_id, nodes, port)
 
