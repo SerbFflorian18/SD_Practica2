@@ -1,10 +1,10 @@
 nodes:
-  - id: slave_1_ID
-    ip: 127.0.0.10
-    port: 32774
-  - id: slave_2_ID
-    ip: 127.0.0.11
-    port: 32775
-  - id: slave_3_ID
-    ip: 127.0.0.12
-    port: 32776
+  - id: node_0
+    ip: 127.0.0.5
+    port: 32770
+  - id: node_1
+    ip: 127.0.0.6
+    port: 32771
+  - id: node_2
+    ip: 127.0.0.7
+    port: 32772

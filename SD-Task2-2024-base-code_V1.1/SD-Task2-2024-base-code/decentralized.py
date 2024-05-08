@@ -1,6 +1,7 @@
 import grpc
 import sys
 import os
+import socket
 
 # Agregar la ruta al directorio proto al Python PATH
 proto_dir = os.path.join(os.path.dirname(__file__), 'proto')
@@ -15,9 +16,8 @@ import time
 import random
 import threading
 
-#python -m grpc_tools.protoc -I./ --python_out=. --grpc_python_out=. ./store.proto
-
 _ONE_DAY_IN_SECONDS = 60 * 60 * 24
+
 class KeyValueStore(store_pb2_grpc.KeyValueStoreServicer):
     def __init__(self, node_id, nodes):
         self.node_id = node_id
@@ -28,11 +28,12 @@ class KeyValueStore(store_pb2_grpc.KeyValueStoreServicer):
     def put(self, request, context):
         with self.lock:
             self.data[request.key] = request.value
-            self.replicate(request)
-        return store_pb2.PutResponse(success=True)
+        self.replicate(request)
+        return store_pb2.Response(success=True)
 
     def get(self, request, context):
-        value = self.data.get(request.key, "")
+        with self.lock:
+            value = self.data.get(request.key, "")
         return store_pb2.GetResponse(value=value)
 
     def slowDown(self, request, context):
@@ -41,18 +42,6 @@ class KeyValueStore(store_pb2_grpc.KeyValueStoreServicer):
 
     def restore(self, request, context):
         return store_pb2.RestoreResponse(success=True)
-
-    def registerNode(self, request, context):
-        # Implementar lógica de registro de nodos aquí
-        return store_pb2.Response(success=True)
-
-    def canCommit(self, request, context):
-        # Implementar lógica de confirmación de compromisos aquí
-        return store_pb2.Response(success=True)
-
-    def doCommit(self, request, context):
-        # Implementar lógica de confirmación de compromisos aquí
-        return store_pb2.Response(success=True)
 
     def replicate(self, request):
         quorum_size = 3 if request.value else 2
@@ -66,12 +55,14 @@ class KeyValueStore(store_pb2_grpc.KeyValueStoreServicer):
 def serve(node_id, nodes, port):
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
     store_pb2_grpc.add_KeyValueStoreServicer_to_server(KeyValueStore(node_id, nodes), server)
-    server.add_insecure_port(f"localhost:{port}")
+    server_address = f"localhost:{port}"
+    server.add_insecure_port(server_address)
     server.start()
-    logging.info("Server started. Listening on port %s", port)
+    logging.info("Server started. Listening on %s", server_address)
+    
     try:
         while True:
-            time.sleep(_ONE_DAY_IN_SECONDS)
+            time.sleep(_ONE_DAY_IN_SECONDS)  # O cualquier otro método para mantener el proceso activo
     except KeyboardInterrupt:
         server.stop(0)
 
@@ -89,7 +80,7 @@ def main():
     nodes = [f"{node['ip']}:{node['port']}" for node in config['nodes']]
 
     # Obtener el puerto del primer nodo para que el servidor escuche
-    port = 50052
+    port = 50055  # Cambiar el puerto predeterminado a localhost
 
     serve(node_id, nodes, port)
 
