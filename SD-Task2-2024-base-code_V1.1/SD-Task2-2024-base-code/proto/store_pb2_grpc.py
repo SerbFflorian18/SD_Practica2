@@ -59,6 +59,21 @@ class KeyValueStoreStub(object):
                 request_serializer=store__pb2.RestoreRequest.SerializeToString,
                 response_deserializer=store__pb2.RestoreResponse.FromString,
                 _registered_method=True)
+        self.registerNode = channel.unary_unary(
+                '/distributedstore.KeyValueStore/registerNode',
+                request_serializer=store__pb2.NodeInfo.SerializeToString,
+                response_deserializer=store__pb2.Response.FromString,
+                _registered_method=True)
+        self.canCommit = channel.unary_unary(
+                '/distributedstore.KeyValueStore/canCommit',
+                request_serializer=store__pb2.CanCommitRequest.SerializeToString,
+                response_deserializer=store__pb2.Response.FromString,
+                _registered_method=True)
+        self.doCommit = channel.unary_unary(
+                '/distributedstore.KeyValueStore/doCommit',
+                request_serializer=store__pb2.DoCommitRequest.SerializeToString,
+                response_deserializer=store__pb2.Response.FromString,
+                _registered_method=True)
 
 
 class KeyValueStoreServicer(object):
@@ -88,6 +103,24 @@ class KeyValueStoreServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def registerNode(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def canCommit(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def doCommit(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
 
 def add_KeyValueStoreServicer_to_server(servicer, server):
     rpc_method_handlers = {
@@ -110,6 +143,21 @@ def add_KeyValueStoreServicer_to_server(servicer, server):
                     servicer.restore,
                     request_deserializer=store__pb2.RestoreRequest.FromString,
                     response_serializer=store__pb2.RestoreResponse.SerializeToString,
+            ),
+            'registerNode': grpc.unary_unary_rpc_method_handler(
+                    servicer.registerNode,
+                    request_deserializer=store__pb2.NodeInfo.FromString,
+                    response_serializer=store__pb2.Response.SerializeToString,
+            ),
+            'canCommit': grpc.unary_unary_rpc_method_handler(
+                    servicer.canCommit,
+                    request_deserializer=store__pb2.CanCommitRequest.FromString,
+                    response_serializer=store__pb2.Response.SerializeToString,
+            ),
+            'doCommit': grpc.unary_unary_rpc_method_handler(
+                    servicer.doCommit,
+                    request_deserializer=store__pb2.DoCommitRequest.FromString,
+                    response_serializer=store__pb2.Response.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -219,6 +267,87 @@ class KeyValueStore(object):
             '/distributedstore.KeyValueStore/restore',
             store__pb2.RestoreRequest.SerializeToString,
             store__pb2.RestoreResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def registerNode(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/distributedstore.KeyValueStore/registerNode',
+            store__pb2.NodeInfo.SerializeToString,
+            store__pb2.Response.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def canCommit(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/distributedstore.KeyValueStore/canCommit',
+            store__pb2.CanCommitRequest.SerializeToString,
+            store__pb2.Response.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def doCommit(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/distributedstore.KeyValueStore/doCommit',
+            store__pb2.DoCommitRequest.SerializeToString,
+            store__pb2.Response.FromString,
             options,
             channel_credentials,
             insecure,

@@ -6,7 +6,7 @@ import socket
 # Agregar la ruta al directorio proto al Python PATH
 proto_dir = os.path.join(os.path.dirname(__file__), 'proto')
 sys.path.append(proto_dir)
-
+#python -m grpc_tools.protoc -I./ --python_out=. --grpc_python_out=. ./store.proto
 import store_pb2
 import store_pb2_grpc
 import yaml 

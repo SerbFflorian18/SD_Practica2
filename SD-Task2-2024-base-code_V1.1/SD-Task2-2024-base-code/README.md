@@ -1,21 +1,28 @@
 # Distributed storage systems and the CAP theorem
 
 ```
-Project/
-│
+SD_PRACTICA2/
+├── _¿pycache?_
+|
 ├── proto/
+|   ├── _pycache_
 │   ├── store.proto
 │   ├── store_pb2.py
 │   └── store_pb2_grpc.py
 │
-├── config_centralized.yaml
+├── centralized_config.yaml
 ├── centralized.py
+|
+├── decentralized_config.yaml
 ├── decentralized.py
+|
 ├── eval/
-│   ├── test_centralized_system.py
-│   └── test_decentralized_system.py
-│
-└── ...
+|   ├── _¿pycache?_
+|   ├── eval.py
+│   ├── centralized_system_test.py
+│   └── decentralized_system_test.py
+|
+└── READMEmd
 ```
 
 ## Directory Structure Explanation
