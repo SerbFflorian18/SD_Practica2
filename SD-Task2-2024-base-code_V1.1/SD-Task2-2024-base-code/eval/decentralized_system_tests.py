@@ -1,3 +1,7 @@
+#python -m grpc_tools.protoc -I./ --python_out=. --grpc_python_out=. ./store.proto
+#python .\eval\decentralized_system_tests.py
+#python .\decentralized.py
+#source .venv/bin/activate
 import sys
 import os
 
