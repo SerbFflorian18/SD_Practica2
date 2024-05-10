@@ -4,25 +4,28 @@
 SD_PRACTICA2/
 ├── _¿pycache?_
 |
+├── eval/
+|   ├── _pycache_
+|   ├── eval.py
+│   ├── centralized_system_test.py
+│   └── decentralized_system_test.py
+|
 ├── proto/
 |   ├── _pycache_
 │   ├── store.proto
 │   ├── store_pb2.py
 │   └── store_pb2_grpc.py
-│
+|
 ├── centralized_config.yaml
 ├── centralized.py
 |
 ├── decentralized_config.yaml
 ├── decentralized.py
 |
-├── eval/
-|   ├── _¿pycache?_
-|   ├── eval.py
-│   ├── centralized_system_test.py
-│   └── decentralized_system_test.py
+├── error.log
+├── warning.log
 |
-└── READMEmd
+└── README.md
 ```
 
 ## Directory Structure Explanation

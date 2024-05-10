@@ -2,17 +2,19 @@ import signal
 import sys
 import logging
 import os
-import grpc
+import grpc # type: ignore
 from grpc.experimental import aio as grpc_aio  # type: ignore
 #python -m grpc_tools.protoc -I./ --python_out=. --grpc_python_out=. ./store.proto
 #python .\eval\decentralized_system_tests.py
 #python .\decentralized.py
 #source .venv/bin/activate
+#puertos activos: netstat -ano | findstr 32770
+#matar proceso: taskkill /F /PID 27148 
 proto_dir = os.path.join(os.path.dirname(__file__), 'proto')
 sys.path.append(proto_dir)
 import store_pb2
 import store_pb2_grpc
-import yaml
+import yaml # type: ignore
 import asyncio
 import json
 import random
