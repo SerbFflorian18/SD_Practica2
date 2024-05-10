@@ -1,10 +1,10 @@
 nodes:
   - id: node_0
-    ip: localhost
+    ip: 127.0.0.1
     port: 32770
   - id: node_1
-    ip: localhost
+    ip: 127.0.0.1
     port: 32771
   - id: node_2
-    ip: localhost
+    ip: 127.0.0.1
     port: 32772
