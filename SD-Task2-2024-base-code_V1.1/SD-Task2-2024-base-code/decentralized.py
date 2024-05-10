@@ -9,7 +9,10 @@ sys.path.append(proto_dir)
 #python .\eval\decentralized_system_tests.py
 #python .\decentralized.py
 #source .venv/bin/activate
-#ejecutar test con varios threads a la vez, mas rapido: pytest -n 4 eval/decentralized_system_tests.py
+#ejecutar test con varios threads a la vez, mas rapido: pytest -n auto --tb=short eval/decentralized_system_tests.py
+#parar al detectar el primer error: pytest -n auto -x --tb=short eval/decentralized_system_tests.py
+
+import signal
 import grpc
 import os
 import socket
@@ -88,7 +91,6 @@ async def main():
     # Cargar la configuración desde el archivo YAML
     with open(config_path, 'r') as config_file:
         config = yaml.safe_load(config_file)
-
     servers = []
     try:
         # Iniciar un servidor para cada nodo en la configuración
@@ -102,14 +104,16 @@ async def main():
             await server.start()
             servers.append(server)
             logging.info(f"Server for node {node_id} listening on localhost:{port}")
-
-        # Esperar a que todos los servidores se detengan
+        # Esperar a que todos los servidores estén listos
         await asyncio.gather(*[server.server.wait_for_termination() for server in servers])
     except KeyboardInterrupt:
         logging.info("Stopping servers...")
         await asyncio.gather(*[server.stop() for server in servers])
     finally:
         logging.info("Closing all servers...")
+
+# Manejar la señal de interrupción para detener los servidores
+signal.signal(signal.SIGINT, lambda s, f: asyncio.create_task(main()))
 
 # Ejecutar la función principal si este archivo se ejecuta como un script
 if __name__ == '__main__':
