@@ -2,98 +2,141 @@ syntax = "proto3";
 
 package distributedstore;
 
+// Message defining information about a node in the system
 message NodeInfo {
-  int32 id = 1;
-  string ip = 2;
-  int32 port = 3;
+  int32 id = 1;        
+  string ip = 2;        
+  int32 port = 3;      
 }
 
-// Mensajes adicionales para el algoritmo de quórum ponderado
+// Additional messages for the weighted quorum algorithm
+
+// Request message for voting in the weighted quorum algorithm
 message VoteRequest {
-  string key = 1;
+  string key = 1;      
 }
 
+// Response message indicating the vote in the weighted quorum algorithm
 message VoteResponse {
-  int32 vote = 1;
+  int32 vote = 1;      
 }
 
+// Request message for committing data in the weighted quorum algorithm
 message CommitRequest {
-  string key = 1;
-  string value = 2;
+  string key = 1;      
+  string value = 2;    
 }
 
+// Response message indicating the success of the commit operation
 message CommitResponse {
-  bool success = 1;
+  bool success = 1;    
 }
 
+// gRPC service defining operations for the key-value store
 service KeyValueStore {
+  // Basic operations for the key-value store
+
+  // Operation to store or update a key-value pair
   rpc put(PutRequest) returns (PutResponse);
+
+  // Operation to retrieve the value associated with a key
   rpc get(GetRequest) returns (GetResponse);
-  rpc slowDown(SlowDownRequest) returns (SlowDownResponse);
+
+  // Operation to introduce delay for testing purposes
+  rpc slowDown(SlowdownRequest) returns (SlowDownResponse);
+
+  // Operation to restore the state of a node
   rpc restore(RestoreRequest) returns (RestoreResponse);
+
+  // Operation to register information about a node
   rpc registerNode(NodeInfo) returns (Response);
+
+  // Operation to check if a commit can be performed
   rpc canCommit(CanCommitRequest) returns (Response);
+
+  // Operation to perform the commit of data
   rpc doCommit(DoCommitRequest) returns (Response);
 
-  // Nuevas operaciones para el algoritmo de quórum ponderado
+  // Additional operations for the weighted quorum algorithm
+
+  // Operation to propagate a put request to other nodes
   rpc propagatePut(PropagatePutRequest) returns (PropagatePutResponse);
+
+  // Operation to request votes from other nodes in the weighted quorum algorithm
   rpc requestVote(VoteRequest) returns (VoteResponse);
+
+  // Operation to commit data to a specific node in the weighted quorum algorithm
   rpc commitToNode(CommitRequest) returns (CommitResponse);
 }
 
-// Mensajes adicionales para las operaciones del algoritmo de quórum ponderado
+// Additional messages for operations in the weighted quorum algorithm
+
+// Request message for propagating a put request to other nodes
 message PropagatePutRequest {
-  string key = 1;
-  string value = 2;
+  string key = 1;      
+  string value = 2;    
 }
 
+// Response message indicating the success of propagating the put request
 message PropagatePutResponse {
-  bool success = 1;
+  bool success = 1;    
 }
 
+// Request message for storing or updating a key-value pair
 message PutRequest {
-  string key = 1;
-  optional string value = 2;
+  string key = 1;      
+  optional string value = 2;  
 }
 
+// Response message indicating the success of storing or updating the key-value pair
 message PutResponse {
-  bool success = 1;
+  bool success = 1;    
 }
 
+// Request message for retrieving the value associated with a key
 message GetRequest {
-  string key = 1;
+  string key = 1;      
 }
 
+// Response message containing the value associated with a key and its existence
 message GetResponse {
-  string value = 1;
-  bool found = 2;
+  string value = 1;    
+  bool found = 2;      
 }
 
-message SlowDownRequest {
-  int32 delay = 1;
+// Request message for introducing delay in operations
+message SlowdownRequest {
+  int32 delay = 1;   
 }
 
+// Response message indicating the success of the slowdown operation
 message SlowDownResponse {
-  bool success = 1;
+  bool success = 1;    
 }
 
+// Request message for restoring the state of a node
 message RestoreRequest {}
 
+// Response message indicating the success of the restore operation
 message RestoreResponse {
-  bool success = 1;
+  bool success = 1;    
 }
 
+// Empty message used for certain operations
 message Empty {}
 
+// Request message for checking if a commit can be performed
 message CanCommitRequest {
-  string key = 1;
+  string key = 1;      
 }
 
+// Request message for performing the commit of data
 message DoCommitRequest {
-  string key = 1;
-  string value = 2;
+  string key = 1;      
+  string value = 2;    
 }
 
+// Response message indicating the success of an operation
 message Response {
-  bool success = 1;
+  bool success = 1;    
 }

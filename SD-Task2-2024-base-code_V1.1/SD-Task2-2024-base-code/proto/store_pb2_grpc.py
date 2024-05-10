@@ -31,7 +31,9 @@ if _version_not_supported:
 
 
 class KeyValueStoreStub(object):
-    """Missing associated documentation comment in .proto file."""
+    """gRPC service defining operations for the key-value store
+    Basic operations for the key-value store
+    """
 
     def __init__(self, channel):
         """Constructor.
@@ -51,7 +53,7 @@ class KeyValueStoreStub(object):
                 _registered_method=True)
         self.slowDown = channel.unary_unary(
                 '/distributedstore.KeyValueStore/slowDown',
-                request_serializer=store__pb2.SlowDownRequest.SerializeToString,
+                request_serializer=store__pb2.SlowdownRequest.SerializeToString,
                 response_deserializer=store__pb2.SlowDownResponse.FromString,
                 _registered_method=True)
         self.restore = channel.unary_unary(
@@ -92,65 +94,78 @@ class KeyValueStoreStub(object):
 
 
 class KeyValueStoreServicer(object):
-    """Missing associated documentation comment in .proto file."""
+    """gRPC service defining operations for the key-value store
+    Basic operations for the key-value store
+    """
 
     def put(self, request, context):
-        """Missing associated documentation comment in .proto file."""
+        """Operation to store or update a key-value pair
+        """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
     def get(self, request, context):
-        """Missing associated documentation comment in .proto file."""
+        """Operation to retrieve the value associated with a key
+        """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
     def slowDown(self, request, context):
-        """Missing associated documentation comment in .proto file."""
+        """Operation to introduce delay for testing purposes
+        """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
     def restore(self, request, context):
-        """Missing associated documentation comment in .proto file."""
+        """Operation to restore the state of a node
+        """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
     def registerNode(self, request, context):
-        """Missing associated documentation comment in .proto file."""
+        """Operation to register information about a node
+        """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
     def canCommit(self, request, context):
-        """Missing associated documentation comment in .proto file."""
+        """Operation to check if a commit can be performed
+        """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
     def doCommit(self, request, context):
-        """Missing associated documentation comment in .proto file."""
+        """Operation to perform the commit of data
+        """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
     def propagatePut(self, request, context):
-        """Nuevas operaciones para el algoritmo de quórum ponderado
+        """Additional operations for the weighted quorum algorithm
+
+        Operation to propagate a put request to other nodes
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
     def requestVote(self, request, context):
-        """Missing associated documentation comment in .proto file."""
+        """Operation to request votes from other nodes in the weighted quorum algorithm
+        """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
     def commitToNode(self, request, context):
-        """Missing associated documentation comment in .proto file."""
+        """Operation to commit data to a specific node in the weighted quorum algorithm
+        """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
@@ -170,7 +185,7 @@ def add_KeyValueStoreServicer_to_server(servicer, server):
             ),
             'slowDown': grpc.unary_unary_rpc_method_handler(
                     servicer.slowDown,
-                    request_deserializer=store__pb2.SlowDownRequest.FromString,
+                    request_deserializer=store__pb2.SlowdownRequest.FromString,
                     response_serializer=store__pb2.SlowDownResponse.SerializeToString,
             ),
             'restore': grpc.unary_unary_rpc_method_handler(
@@ -216,7 +231,9 @@ def add_KeyValueStoreServicer_to_server(servicer, server):
 
  # This class is part of an EXPERIMENTAL API.
 class KeyValueStore(object):
-    """Missing associated documentation comment in .proto file."""
+    """gRPC service defining operations for the key-value store
+    Basic operations for the key-value store
+    """
 
     @staticmethod
     def put(request,
@@ -287,7 +304,7 @@ class KeyValueStore(object):
             request,
             target,
             '/distributedstore.KeyValueStore/slowDown',
-            store__pb2.SlowDownRequest.SerializeToString,
+            store__pb2.SlowdownRequest.SerializeToString,
             store__pb2.SlowDownResponse.FromString,
             options,
             channel_credentials,
