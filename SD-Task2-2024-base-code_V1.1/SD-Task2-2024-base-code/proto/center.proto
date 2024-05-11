@@ -1,0 +1,47 @@
+syntax = "proto3";
+
+service InternalProtocol{
+  rpc notifyMaster(notifyMasterRequest) returns (notifyMasterResponse);
+  rpc canCommit(canCommitRequest) returns (canCommitResponse);
+  rpc doCommit(doCommitRequest) returns (doCommitResponse);
+  rpc doAbort(doAbortRequest) returns (doAbortResponse);
+
+}
+
+// Node Discovery protocol
+message notifyMasterRequest{
+  int32 id = 1;
+  string ip = 2;
+  int32 port = 3;
+}
+
+message notifyMasterResponse{
+  bool ack = 1;
+}
+
+
+// Can commit
+message canCommitRequest{}
+
+message canCommitResponse{
+  bool ack = 1;
+}
+
+
+// Do commit
+message doCommitRequest{
+  string key = 1;
+  string value = 2;
+}
+
+message doCommitResponse{
+  bool ack = 1;
+}
+
+
+// Do abort
+message doAbortRequest{}
+
+message doAbortResponse{
+  bool ack = 1;
+}

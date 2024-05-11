@@ -153,7 +153,7 @@ class TestCentralizedSystem(unittest.TestCase):
     def test_system_scalability_and_performance_with_slowdown_slave(self):
         
         # Slow down 
-        slowdown_request = store_pb2.SlowdownRequest(delay=1)
+        slowdown_request = store_pb2.SlowDownRequest(seconds=1)
         stub_slave = random.choice(self.stubs_slaves)
         slowdown_resp = stub_slave.slowDown(slowdown_request)
         assert slowdown_resp.success, "Failed to slow down slave."
@@ -180,7 +180,7 @@ class TestCentralizedSystem(unittest.TestCase):
     def test_system_scalability_and_performance_with_slowdown_master(self):
         
         # Slow down 
-        slowdown_request = store_pb2.SlowdownRequest(delay=1)
+        slowdown_request = store_pb2.SlowDownRequest(seconds=1)
         slowdown_resp = self.stub_put.slowDown(slowdown_request)
         assert slowdown_resp.success, "Failed to slow down master."
         

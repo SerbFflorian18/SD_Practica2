@@ -1,15 +1,22 @@
+import pickle
+
 
 class StorageService:
     def __init__(self):
         self.database = dict()
+        try:
+            self.restore()
+        except FileNotFoundError:
+            pass
 
     # Save key and value in the database
     def save(self, key, value):
         try:
             self.database[key] = value
+            self.dump()
             success = True
         except:
-            success=False
+            success = False
         
         return success
 
@@ -18,10 +25,23 @@ class StorageService:
 
         try:
             data = self.database[key]
-            found=True
+            found = True
         except:
-            data=None
-            found=False
+            data = None
+            found = False
 
         return found, data
+
+    # Save The data in a file
+    def dump(self):
+        with open("storage.pickle", "wb") as f:
+            pickle.dump(self.database, f)
+
+    # Read data from the file
+    def restore(self):
+        with open("storage.pickle", "rb") as f:
+            loaded = pickle.load(f)
+            self.database  = loaded
+
+
 
