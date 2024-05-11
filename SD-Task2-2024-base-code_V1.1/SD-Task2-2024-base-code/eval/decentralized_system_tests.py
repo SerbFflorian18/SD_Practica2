@@ -35,13 +35,13 @@ class TestDecentralizedSystem(unittest.TestCase):
 
     def load_config(self):
         """Load configuration from a YAML file."""
-        config_path = os.path.join('../decentralized_config.yaml')
+        config_path = os.path.join('decentralized_config.yaml')
         with open(config_path, 'r') as file:
             return yaml.safe_load(file)
 
     def start_grpc_server(self):
         """Start the gRPC server as a subprocess."""
-        server_script_path = os.path.join('../decentralized.py')
+        server_script_path = os.path.join('decentralized.py')
         server_process = subprocess.Popen(
             [sys.executable, server_script_path]
         )
