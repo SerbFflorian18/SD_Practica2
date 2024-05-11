@@ -15,6 +15,7 @@ import concurrent.futures
 import store_pb2, store_pb2_grpc
 from tabulate import tabulate
 
+
 class TestDecentralizedSystem(unittest.TestCase):
     def setUp(self):
         """Set up test fixtures by starting the gRPC server and connecting to it."""
@@ -61,7 +62,7 @@ class TestDecentralizedSystem(unittest.TestCase):
         """Tear down test fixtures by stopping the server and closing the channel."""
         self.close_grpc_channel()
         self.stop_grpc_server()
-        
+
     def close_grpc_channel(self):
         """Close the gRPC channel."""
         self.channel.close()
@@ -83,7 +84,7 @@ class TestDecentralizedSystem(unittest.TestCase):
         return False
 
     def test_put_success(self):
-        """Test that a successful put operation correctly updates the data."""  
+        """Test that a successful put operation correctly updates the data."""
         self.logger.info("Testing put success...")
         response = self.stub.put(store_pb2.PutRequest(key="test_key", value="test_value"))
         self.assertTrue(response.success)
@@ -98,6 +99,7 @@ class TestDecentralizedSystem(unittest.TestCase):
     def test_concurrent_access(self):
         """Test handling of concurrent put and get requests."""
         self.logger.info("Testing concurrent access...")
+
         def worker(key, value):
             try:
                 for _ in range(10):
@@ -108,7 +110,7 @@ class TestDecentralizedSystem(unittest.TestCase):
                 self.fail(f"Error occurred: {e}")
 
         threads = []
-        for i in range (2):
+        for i in range(2):
             t = Thread(target=worker, args=(f'key{i}', f'value{i}'))
             t.start()
             threads.append(t)
@@ -127,7 +129,7 @@ class TestDecentralizedSystem(unittest.TestCase):
             channel = grpc.insecure_channel(channel_address)
             stub = store_pb2_grpc.KeyValueStoreStub(channel)
             stub.put(store_pb2.PutRequest(key="perf_key", value="perf_value"))
-            stub.get(store_pb2.GetRequest(key="perf_key"))    
+            stub.get(store_pb2.GetRequest(key="perf_key"))
 
     def test_system_scalability_and_performance(self):
         """Test the system's scalability and performance by simulating high concurrent access."""
@@ -146,18 +148,16 @@ class TestDecentralizedSystem(unittest.TestCase):
 
         self.assertLess(duration, 10, "The system took too long to perform the operations.")
 
-    
     def test_system_scalability_and_performance_with_slowdown(self):
-        
-        # Slow down 
+
+        # Slow down
         slowdown_request = store_pb2.SlowdownRequest(delay=1)
         slowdown_resp = self.stub.slowDown(slowdown_request)
         assert slowdown_resp.success, "Failed to slow down node."
-        
+
         start_time = time.time()
         process_count = 10
         operations_per_process = 20
-
 
         with concurrent.futures.ProcessPoolExecutor() as executor:
             futures = [executor.submit(self.perform_operations, operations_per_process) for _ in range(process_count)]
@@ -165,15 +165,15 @@ class TestDecentralizedSystem(unittest.TestCase):
 
         end_time = time.time()
         duration = end_time - start_time
-        print(f"Performed {process_count * operations_per_process * 2} operations in {duration:.2f} seconds (slowing down master).")
-        
+        print(
+            f"Performed {process_count * operations_per_process * 2} operations in {duration:.2f} seconds (slowing down master).")
+
         # Restore
         restore_request = store_pb2.RestoreRequest()
         restore_resp = self.stub.restore(restore_request)
         assert restore_resp.success, "Failed to restore node."
 
         assert duration < 10, "The system took too long to perform the operations."
-
 
     def test_state_recovery_after_critical_failure(self):
         """Test the system's ability to recover state after a critical failure."""
@@ -190,11 +190,12 @@ class TestDecentralizedSystem(unittest.TestCase):
             self.channel, self.stub = self.connect_to_grpc_server()
 
             response_get = self.stub.get(store_pb2.GetRequest(key="stable_key"))
-            self.assertEqual(response_get.value, "stable_value", "Data did not recover correctly after critical failure.")
+            self.assertEqual(response_get.value, "stable_value",
+                             "Data did not recover correctly after critical failure.")
         except Exception as e:
             self.logger.exception("Error during state recovery test: %s", str(e))
             self.fail("Error during state recovery test: %s" % str(e))
-            
+
     def test_node_failure_during_transaction(self):
         """Simulate node failure during a transaction and check for system consistency."""
         self.logger.info("Testing node failure during transaction...")
@@ -225,11 +226,11 @@ if __name__ == '__main__':
         status = 'FAIL' if (case, reason) in results.failures else 'ERROR'
         row = [case.id().split('.')[-1], status, reason]
         table.append(row)
-    
+
     if results.testsRun:
         passed = results.testsRun - len(results.failures) - len(results.errors)
         table.append(["Total", "PASSED", f"{passed}/{results.testsRun}"])
-    
+
     print("\nDecentralized Test Results Summary:")
     print(tabulate(table, headers=["Test Case", "Result", "Details"], tablefmt="pretty"))
 

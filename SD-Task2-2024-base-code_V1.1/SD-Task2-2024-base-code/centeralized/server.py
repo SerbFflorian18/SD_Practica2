@@ -113,7 +113,7 @@ class StorageServiceServicer(store_pb2_grpc.KeyValueStore, center_pb2_grpc.Inter
         time.sleep(self.delay)
 
         # Set delay to the value of seconds
-        self.delay = self.delay + int(request.seconds)
+        self.delay = self.delay + int(request.delay)
 
         # Make a response
         response = store_pb2.SlowDownResponse(success=True)
