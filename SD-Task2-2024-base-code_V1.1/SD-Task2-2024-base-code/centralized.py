@@ -16,7 +16,7 @@ async def main():
     node_2 = StorageServiceServicer(False, 1)
     node_2.start_server()
 
-    node_1.server.stop(0)
+    #node_1.server.stop(0)
 
 
 
