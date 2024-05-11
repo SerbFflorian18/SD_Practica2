@@ -9,14 +9,14 @@ import store_pb2
 
 
 # Open a gRPC channel
-channel = grpc.insecure_channel('localhost:32771')
+channel = grpc.insecure_channel('localhost:32770')
 
 # Create a stub (client)
 stub = store_pb2_grpc.KeyValueStoreStub(channel)
 
-# request = store_pb2.PutRequest(key='first', value='newer')
-# response = stub.put(request)
-# print("res: ", response.success)
+request = store_pb2.PutRequest(key='first', value='newer')
+response = stub.put(request)
+print("res: ", response.success)
 
 try:
     #slow_request = store_pb2.SlowDownRequest(seconds=2)

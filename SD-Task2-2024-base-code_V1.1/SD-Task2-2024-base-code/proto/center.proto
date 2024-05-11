@@ -5,6 +5,7 @@ service InternalProtocol{
   rpc canCommit(canCommitRequest) returns (canCommitResponse);
   rpc doCommit(doCommitRequest) returns (doCommitResponse);
   rpc doAbort(doAbortRequest) returns (doAbortResponse);
+  rpc ping(PingRequest) returns (PingResponse);
 
 }
 
@@ -45,3 +46,7 @@ message doAbortRequest{}
 message doAbortResponse{
   bool ack = 1;
 }
+
+// Define request and response messages
+message PingRequest {}
+message PingResponse {}

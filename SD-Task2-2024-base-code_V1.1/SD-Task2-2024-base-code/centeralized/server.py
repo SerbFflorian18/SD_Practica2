@@ -67,17 +67,21 @@ class StorageServiceServicer(store_pb2_grpc.KeyValueStore, center_pb2_grpc.Inter
 
         # Check if this node is the master, otherwise do not save any data in the Storage
         if self.is_master:
+            try:
+                # Send vote request to all nodes
+                vote = self.multicastCanCommit()
 
-            # Send vote request to all nodes
-            vote = self.multicastCanCommit()
+                if vote:
+                    # If they all agree we send a do commit
+                    success = self.multicastDoCommit(request.key, request.value)
+                else:
+                    success = False
 
-            if vote:
-                # If they all agree we send a do commit
-                success = self.multicastDoCommit(request.key, request.value)
-            else:
-                success = False
+                response = store_pb2.PutResponse(success=success)
+            except grpc.RpcError as e:
+                # Some Node is down
+                pass
 
-            response = store_pb2.PutResponse(success=success)
 
         else:
             # We can not accept put requests in a slave node
