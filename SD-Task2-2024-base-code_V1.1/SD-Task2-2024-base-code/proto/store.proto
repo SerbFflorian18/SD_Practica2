@@ -140,5 +140,3 @@ message DoCommitRequest {
 message Response {
   bool success = 1;    
 }
-
-

@@ -13,6 +13,11 @@
         "./SD-Task2-2024-base-code_V1.1/SD-Task2-2024-base-code/proto/store_pb2_",
         "./SD-Task2-2024-base-code_V1.1/SD-Task2-2024-base-code/proto/store_pb2_",
         "./SD-Task2-2024-base-code_V1.1/SD-Task2-2024-base-code/proto/store_pb2_",
-        "./SD-Task2-2024-base-code_V1.1/SD-Task2-2024-base-code/proto/store_pb2_"
+        "./SD-Task2-2024-base-code_V1.1/SD-Task2-2024-base-code/proto/store_pb2_",
+        "./SD-Task2-2024-base-code_V1.1/SD-Task2-2024-base-code/proto/store_pb2_",
+        "./SD-Task2-2024-base-code_V1.1/SD-Task2-2024-base-code/decentralized/proto",
+        "./SD-Task2-2024-base-code_V1.1/SD-Task2-2024-base-code/proto/store_pb2_",
+        "./SD-Task2-2024-base-code_V1.1/SD-Task2-2024-base-code/proto/center_pb2_",
+        "./SD-Task2-2024-base-code_V1.1/SD-Task2-2024-base-code/decentralized/proto/desc_pb2_"
     ]
 }

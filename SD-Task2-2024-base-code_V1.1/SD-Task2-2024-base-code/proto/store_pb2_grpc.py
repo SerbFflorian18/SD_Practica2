@@ -504,3 +504,117 @@ class KeyValueStore(object):
             timeout,
             metadata,
             _registered_method=True)
+
+
+class NodeDiscoveryStub(object):
+    """Missing associated documentation comment in .proto file."""
+
+    def __init__(self, channel):
+        """Constructor.
+
+        Args:
+            channel: A grpc.Channel.
+        """
+        self.RegisterNode = channel.unary_unary(
+                '/distributedstore.NodeDiscovery/RegisterNode',
+                request_serializer=store__pb2.RegisterNodeRequest.SerializeToString,
+                response_deserializer=store__pb2.RegisterNodeResponse.FromString,
+                _registered_method=True)
+        self.GetNodes = channel.unary_unary(
+                '/distributedstore.NodeDiscovery/GetNodes',
+                request_serializer=store__pb2.GetNodesRequest.SerializeToString,
+                response_deserializer=store__pb2.GetNodesResponse.FromString,
+                _registered_method=True)
+
+
+class NodeDiscoveryServicer(object):
+    """Missing associated documentation comment in .proto file."""
+
+    def RegisterNode(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def GetNodes(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+
+def add_NodeDiscoveryServicer_to_server(servicer, server):
+    rpc_method_handlers = {
+            'RegisterNode': grpc.unary_unary_rpc_method_handler(
+                    servicer.RegisterNode,
+                    request_deserializer=store__pb2.RegisterNodeRequest.FromString,
+                    response_serializer=store__pb2.RegisterNodeResponse.SerializeToString,
+            ),
+            'GetNodes': grpc.unary_unary_rpc_method_handler(
+                    servicer.GetNodes,
+                    request_deserializer=store__pb2.GetNodesRequest.FromString,
+                    response_serializer=store__pb2.GetNodesResponse.SerializeToString,
+            ),
+    }
+    generic_handler = grpc.method_handlers_generic_handler(
+            'distributedstore.NodeDiscovery', rpc_method_handlers)
+    server.add_generic_rpc_handlers((generic_handler,))
+
+
+ # This class is part of an EXPERIMENTAL API.
+class NodeDiscovery(object):
+    """Missing associated documentation comment in .proto file."""
+
+    @staticmethod
+    def RegisterNode(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/distributedstore.NodeDiscovery/RegisterNode',
+            store__pb2.RegisterNodeRequest.SerializeToString,
+            store__pb2.RegisterNodeResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def GetNodes(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/distributedstore.NodeDiscovery/GetNodes',
+            store__pb2.GetNodesRequest.SerializeToString,
+            store__pb2.GetNodesResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)

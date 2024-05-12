@@ -2,23 +2,26 @@ import signal
 import sys
 import logging
 import os
+import pickle
 import grpc # type: ignore
 from grpc.experimental import aio as grpc_aio  # type: ignore
 #python -m grpc_tools.protoc -I./ --python_out=. --grpc_python_out=. ./store.proto
 #python .\eval\decentralized_system_tests.py
 #python .\decentralized.py
 #source .venv/bin/activate
-#puertos activos: netstat -ano | findstr 32770
-#matar proceso: taskkill /F /PID 27148 
+
 proto_dir = os.path.join(os.path.dirname(__file__), 'proto')
 sys.path.append(proto_dir)
 import store_pb2
 import store_pb2_grpc
 import yaml # type: ignore
 import asyncio
-import json
 import random
 from datetime import datetime
+
+decentralized_dir = os.path.join(os.path.dirname(__file__), 'decentralized/proto')
+sys.path.append(decentralized_dir)
+import desc_pb2_grpc, desc_pb2
 
 # Paths for error and warning log files
 log_dir = os.path.dirname(__file__)
@@ -63,8 +66,13 @@ class KeyValueStore(store_pb2_grpc.KeyValueStoreServicer):
         """
         self.node_id = node_id
         self.nodes = nodes
-        self.data = {}
+        self.data = {}  # Dictionary to store key-value pairs
         self.lock = asyncio.Lock()  # Lock for read and write operations
+        
+        # Define node weights and quorum sizes
+        self.node_weights = {node: 1 for node in nodes}  # Equal weights for all nodes
+        self.write_quorum_size = len(nodes) // 2 + 1  # Majority quorum for writes
+        self.read_quorum_size = len(nodes) // 2 + 1   # Majority quorum for reads
 
     async def put(self, request, context):
         """
@@ -80,6 +88,7 @@ class KeyValueStore(store_pb2_grpc.KeyValueStoreServicer):
         async with self.lock:
             self.data[request.key] = request.value
             await self.persist_data()
+            await self.replicate(request)  # Replicate data to other nodes
             await self.propagate_put(request)
         return store_pb2.PutResponse(success=True)
 
@@ -98,31 +107,44 @@ class KeyValueStore(store_pb2_grpc.KeyValueStoreServicer):
             value = self.data.get(request.key, "")
         return store_pb2.GetResponse(value=value, found=bool(value))
 
-    async def persist_data(self):
+    async def propagate_put(self, request):
         """
-        Persist the data to a JSON file.
-        """
-        try:
-            with open('data.json', 'w') as file:
-                json.dump(self.data, file)
-        except FileNotFoundError as e:
-            error_logger.error("Failed to find data file: %s", e)
-        except PermissionError as e:
-            error_logger.error("Permission denied to write to data file: %s", e)
-        except Exception as e:
-            error_logger.error("Error persisting data: %s", e)
+        Propagate the put operation to other nodes.
 
-    async def recover_data(self):
-        """
-        Recover data from the JSON file.
+        Args:
+            request (store_pb2.PutRequest): The put request.
         """
         try:
-            with open('data.json', 'r') as file:
-                self.data = json.load(file)
-        except FileNotFoundError:
-            warning_logger.warning("Data file not found. Starting with empty data.")
+            nodes = self.weighted_random_nodes(self.write_quorum_size)
+            votes = await asyncio.gather(*[self.request_vote(node, request) for node in nodes])
+            num_votes = sum(1 for vote in votes if vote.vote == self.node_id) + 1
+            if num_votes >= self.write_quorum_size:
+                await self.confirm_to_node(self.node_id, request)
         except Exception as e:
-            error_logger.error("Error recovering data: %s", e)
+            if not isinstance(e, TypeError):
+                error_logger.error("Error propagating modification: %s", e)
+
+    async def propagate_get(self, request):
+        """
+        Propagate the get operation to other nodes.
+
+        Args:
+            request (store_pb2.GetRequest): The get request.
+
+        Returns:
+            str: The value retrieved from other nodes.
+        """
+        try:
+            nodes = self.weighted_random_nodes(self.read_quorum_size)
+            values = await asyncio.gather(*[self.request_value(node, request) for node in nodes if node != self.node_id])
+            values = [value.value for value in values if value.value]
+            if values:
+                return values[0]
+            else:
+                return None
+        except Exception as e:
+            error_logger.error("Error propagating query: %s", e)
+            return None
 
     async def replicate(self, request):
         """
@@ -137,37 +159,6 @@ class KeyValueStore(store_pb2_grpc.KeyValueStoreServicer):
             if node != self.node_id:
                 await self.propagate_put(request)
 
-    async def propagate_put(self, request):
-        """
-        Propagate the put operation to other nodes.
-
-        Args:
-            request (store_pb2.PutRequest): The put request.
-        """
-        try:
-            quorum_size = max(2, len(self.nodes) // 2 + 1)
-            nodes = random.sample(self.nodes, quorum_size)
-            votes = await asyncio.gather(*[self.request_vote(node, request) for node in nodes])
-            num_votes = sum(1 for vote in votes if vote.vote == self.node_id) + 1
-            if num_votes >= quorum_size:
-                await self.confirm_to_node(self.node_id, request)
-        except Exception as e:
-            if not isinstance(e, TypeError):
-                error_logger.error("Error propagating modification: %s", e)
-
-    async def request_vote(self, node, request):
-        """
-        Request a vote from a node.
-
-        Args:
-            node (str): Node address.
-            request (store_pb2.PutRequest): The put request.
-
-        Returns:
-            store_pb2.VoteResponse: The vote response.
-        """
-        return await self.ask_for_vote(request, None)
-
     async def confirm_to_node(self, node, request):
         """
         Confirm the put operation to a node.
@@ -180,27 +171,30 @@ class KeyValueStore(store_pb2_grpc.KeyValueStoreServicer):
             stub = store_pb2_grpc.KeyValueStoreStub(channel)
             await stub.do_commit(store_pb2.CommitRequest(key=request.key, value=request.value))
 
-    async def propagate_get(self, request):
+    def weighted_random_nodes(self, num_nodes):
         """
-        Propagate the get operation to other nodes.
+        Select random nodes based on their weights, ensuring that the selected nodes
+        collectively have enough weight to satisfy the quorum size.
 
         Args:
-            request (store_pb2.GetRequest): The get request.
+            num_nodes (int): Number of nodes to select.
 
         Returns:
-            str: The value retrieved from other nodes.
+            list: List of selected node addresses.
         """
-        try:
-            values = await asyncio.gather(*[self.request_value(node, request) for node in self.nodes if node != self.node_id])
-            values = [value.value for value in values if value.value]
-            if values:
-                return values[0]
-            else:
-                return None
-        except Exception as e:
-            error_logger.error("Error propagating query: %s", e)
-            return None
+        selected_nodes = []
+        remaining_weight = num_nodes
+        weighted_nodes = [(node, weight) for node, weight in self.node_weights.items()]
+        weighted_nodes.sort(key=lambda x: x[1], reverse=True)  # Sort nodes by weight (descending)
 
+        for node, weight in weighted_nodes:
+            if remaining_weight <= 0:
+                break
+            selected_nodes.append(node)
+            remaining_weight -= weight
+
+        return selected_nodes
+    
     async def request_value(self, node, request):
         """
         Request the value associated with a key from a node.
@@ -215,7 +209,7 @@ class KeyValueStore(store_pb2_grpc.KeyValueStoreServicer):
         async with grpc_aio.insecure_channel(node) as channel:
             stub = store_pb2_grpc.KeyValueStoreStub(channel)
             return await stub.get(store_pb2.GetRequest(key=request.key))
-
+    
     async def ask_for_vote(self, request, context):
         """
         Ask a node for a vote.
@@ -228,6 +222,45 @@ class KeyValueStore(store_pb2_grpc.KeyValueStoreServicer):
             store_pb2.VoteResponse: The vote response.
         """
         return store_pb2.VoteResponse(vote=self.node_id)
+
+    async def request_vote(self, node, request):
+        """
+        Request a vote from a node.
+
+        Args:
+            node (str): Node address.
+            request (store_pb2.PutRequest): The put request.
+
+        Returns:
+            store_pb2.VoteResponse: The vote response.
+        """
+        return await self.ask_for_vote(request, None)
+    
+    async def persist_data(self):
+        """
+        Persist the data to a pickle file.
+        """
+        try:
+            with open('dataDescentralized.pickle', 'wb') as file:
+                pickle.dump(self.data, file)
+        except FileNotFoundError as e:
+            error_logger.error("Failed to find data file: %s", e)
+        except PermissionError as e:
+            error_logger.error("Permission denied to write to data file: %s", e)
+        except Exception as e:
+            error_logger.error("Error persisting data: %s", e)
+
+    async def recover_data(self):
+        """
+        Recover data from the pickle file.
+        """
+        try:
+            with open('dataDescentralized.pickle', 'rb') as file:  # Corrected file name
+                self.data = pickle.load(file)
+        except FileNotFoundError:
+            warning_logger.warning("Data file not found. Starting with empty data.")
+        except Exception as e:
+            error_logger.error("Error recovering data: %s", e)
 
     async def slowDown(self, request, context):
         """
@@ -263,7 +296,12 @@ class KeyValueStore(store_pb2_grpc.KeyValueStoreServicer):
             store_pb2.RestoreResponse: The response indicating success or failure.
         """
         try:
+            # Recover data from the data file
             await self.recover_data()
+
+            # Reset any previously set slowdown delay
+            self.delay = 0
+
             return store_pb2.RestoreResponse(success=True)
         except Exception as e:
             error_logger.error("Error restoring node: %s", e)
@@ -289,10 +327,54 @@ async def load_configuration(config_path):
         error_logger.error("Error loading configuration: %s", e)
         return {}
 
+
+async def register_with_discovery(discovery_address, node_id, ip, port):
+    """
+    Register the node with the discovery server.
+
+    Args:
+        discovery_address (str): Address of the discovery server.
+        node_id (str): ID of the node.
+        ip (str): IP address of the node.
+        port (int): Port of the node.
+
+    Returns:
+        bool: True if registration successful, False otherwise.
+    """
+    try:
+        async with grpc_aio.insecure_channel(discovery_address) as channel:
+            stub = desc_pb2_grpc.NodeDiscoveryStub(channel)
+            response = await stub.RegisterNode(desc_pb2.RegisterNodeRequest(node_id=node_id, ip=ip, port=port))
+            if response.success:
+                logging.info("Node registered successfully with discovery server.")
+                return True
+            else:
+                logging.error("Failed to register node with discovery server.")
+                return False
+    except Exception as e:
+        logging.error("Error registering node with discovery server: %s", e)
+        return False
+
+async def get_nodes_from_discovery(discovery_address):
+    """
+    Get the list of nodes from the discovery server.
+
+    Args:
+        discovery_address (str): Address of the discovery server.
+
+    Returns:
+        List[str]: List of node addresses.
+    """
+    try:
+        async with grpc_aio.insecure_channel(discovery_address) as channel:
+            stub = desc_pb2_grpc.DiscoveryStub(channel)
+            response = await stub.GetNodes(desc_pb2.GetNodesRequest())
+            return [f"{node.ip}:{node.port}" for node in response.nodes]
+    except Exception as e:
+        logging.error("Error getting nodes from discovery server: %s", e)
+        return []
+
 async def start_servers():
-    """
-    Start gRPC servers for each node defined in the configuration.
-    """
     config_path = os.path.join(os.path.dirname(__file__), 'decentralized_config.yaml')
     config = await load_configuration(config_path)
     servers = []
@@ -301,7 +383,16 @@ async def start_servers():
             node_id = node['id']
             ip = node['ip']
             port = node['port']
-            nodes = [f"{n['ip']}:{n['port']}" for n in config['nodes'] if n != node and 'ip' in n and 'port' in n]
+            discovery_address = config.get('discovery_address')
+            if discovery_address:
+                # Register node with discovery server
+                if not await register_with_discovery(discovery_address, node_id, ip, port):
+                    continue  # Skip node if registration fails
+
+            # Get nodes from the discovery server
+            nodes = await get_nodes_from_discovery(discovery_address)
+
+            # Create and start server for the node
             service = KeyValueStore(node_id, nodes)
             await service.recover_data()  # Recover data from disk on startup
             server = Server(service, ip, port)
@@ -319,6 +410,7 @@ async def start_servers():
             else:
                 servers.append(server)
                 logging.info(f"Server for node {node_id} listening on {server_address}")
+
         # Handle interrupt signal (Ctrl+C)
         signal.signal(signal.SIGINT, lambda s, f: asyncio.create_task(shutdown(servers)))
 

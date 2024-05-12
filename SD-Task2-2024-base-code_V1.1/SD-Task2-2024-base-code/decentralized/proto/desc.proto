@@ -1,0 +1,43 @@
+syntax = "proto3";
+
+package discovery;
+
+//python -m grpc_tools.protoc -I./ --python_out=. --grpc_python_out=. ./desc.proto
+
+// Definition of the NodeInfo message
+message NodeInfo {
+  int32 id = 1;        // Node ID
+  string ip = 2;       // Node IP address
+  int32 port = 3;      // Node port
+}
+
+// Message for registering a node
+message RegisterNodeRequest {
+  int32 node_id = 1;   // ID of the node
+  string ip = 2;       // Node IP address
+  int32 port = 3;      // Node port
+}
+
+// Response for registering a node
+message RegisterNodeResponse {
+  bool success = 1;    // Indicates whether the registration was successful or not
+}
+
+// Request for getting nodes information
+message GetNodesRequest {
+  // You can define any additional fields necessary for the request here
+}
+
+// Response for getting nodes information
+message GetNodesResponse {
+  repeated NodeInfo nodes = 1;  // List of nodes registered in the system
+}
+
+// gRPC service for node discovery service
+service NodeDiscovery {
+  // Operation to register a node
+  rpc RegisterNode(RegisterNodeRequest) returns (RegisterNodeResponse) {}
+
+  // Operation to get nodes information
+  rpc GetNodes(GetNodesRequest) returns (GetNodesResponse) {}
+}
