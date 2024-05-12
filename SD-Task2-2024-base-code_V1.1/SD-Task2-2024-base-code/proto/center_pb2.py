@@ -14,7 +14,7 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x0c\x63\x65nter.proto\";\n\x13notifyMasterRequest\x12\n\n\x02id\x18\x01 \x01(\x05\x12\n\n\x02ip\x18\x02 \x01(\t\x12\x0c\n\x04port\x18\x03 \x01(\x05\"#\n\x14notifyMasterResponse\x12\x0b\n\x03\x61\x63k\x18\x01 \x01(\x08\"\x12\n\x10\x63\x61nCommitRequest\" \n\x11\x63\x61nCommitResponse\x12\x0b\n\x03\x61\x63k\x18\x01 \x01(\x08\"-\n\x0f\x64oCommitRequest\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t\"\x1f\n\x10\x64oCommitResponse\x12\x0b\n\x03\x61\x63k\x18\x01 \x01(\x08\"\x10\n\x0e\x64oAbortRequest\"\x1e\n\x0f\x64oAbortResponse\x12\x0b\n\x03\x61\x63k\x18\x01 \x01(\x08\"\r\n\x0bPingRequest\"\x0e\n\x0cPingResponse2\x87\x02\n\x10InternalProtocol\x12;\n\x0cnotifyMaster\x12\x14.notifyMasterRequest\x1a\x15.notifyMasterResponse\x12\x32\n\tcanCommit\x12\x11.canCommitRequest\x1a\x12.canCommitResponse\x12/\n\x08\x64oCommit\x12\x10.doCommitRequest\x1a\x11.doCommitResponse\x12,\n\x07\x64oAbort\x12\x0f.doAbortRequest\x1a\x10.doAbortResponse\x12#\n\x04ping\x12\x0c.PingRequest\x1a\r.PingResponseb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x0c\x63\x65nter.proto\";\n\x13notifyMasterRequest\x12\n\n\x02id\x18\x01 \x01(\x05\x12\n\n\x02ip\x18\x02 \x01(\t\x12\x0c\n\x04port\x18\x03 \x01(\x05\"#\n\x14notifyMasterResponse\x12\x0b\n\x03\x61\x63k\x18\x01 \x01(\x08\"\x12\n\x10\x63\x61nCommitRequest\" \n\x11\x63\x61nCommitResponse\x12\x0b\n\x03\x61\x63k\x18\x01 \x01(\x08\"-\n\x0f\x64oCommitRequest\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t\"\x1f\n\x10\x64oCommitResponse\x12\x0b\n\x03\x61\x63k\x18\x01 \x01(\x08\"\x10\n\x0e\x64oAbortRequest\"\x1e\n\x0f\x64oAbortResponse\x12\x0b\n\x03\x61\x63k\x18\x01 \x01(\x08\"\r\n\x0bPingRequest\"\x0e\n\x0cPingResponse\"8\n\x10newMasterRequest\x12\n\n\x02id\x18\x01 \x01(\x05\x12\n\n\x02ip\x18\x02 \x01(\t\x12\x0c\n\x04port\x18\x03 \x01(\x05\" \n\x11newMasterResponse\x12\x0b\n\x03\x61\x63k\x18\x01 \x01(\x08\x32\xbb\x02\n\x10InternalProtocol\x12;\n\x0cnotifyMaster\x12\x14.notifyMasterRequest\x1a\x15.notifyMasterResponse\x12\x32\n\tcanCommit\x12\x11.canCommitRequest\x1a\x12.canCommitResponse\x12/\n\x08\x64oCommit\x12\x10.doCommitRequest\x1a\x11.doCommitResponse\x12,\n\x07\x64oAbort\x12\x0f.doAbortRequest\x1a\x10.doAbortResponse\x12#\n\x04ping\x12\x0c.PingRequest\x1a\r.PingResponse\x12\x32\n\tnewMaster\x12\x11.newMasterRequest\x1a\x12.newMasterResponseb\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -41,6 +41,10 @@ if not _descriptor._USE_C_DESCRIPTORS:
   _globals['_PINGREQUEST']._serialized_end=311
   _globals['_PINGRESPONSE']._serialized_start=313
   _globals['_PINGRESPONSE']._serialized_end=327
-  _globals['_INTERNALPROTOCOL']._serialized_start=330
-  _globals['_INTERNALPROTOCOL']._serialized_end=593
+  _globals['_NEWMASTERREQUEST']._serialized_start=329
+  _globals['_NEWMASTERREQUEST']._serialized_end=385
+  _globals['_NEWMASTERRESPONSE']._serialized_start=387
+  _globals['_NEWMASTERRESPONSE']._serialized_end=419
+  _globals['_INTERNALPROTOCOL']._serialized_start=422
+  _globals['_INTERNALPROTOCOL']._serialized_end=737
 # @@protoc_insertion_point(module_scope)

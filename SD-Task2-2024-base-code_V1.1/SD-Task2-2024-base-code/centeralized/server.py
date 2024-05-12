@@ -37,33 +37,63 @@ class StorageServiceServicer(store_pb2_grpc.KeyValueStore, center_pb2_grpc.Inter
         self.server = None
         self.master = None
         self.nodes = list()
+        self.all_nodes = list()
         self.config = self.load_config()
         self.id = slave_id
         self.ip = self.config['slaves'][slave_id]['ip'] if not is_master else self.config['master']['ip']
         self.port = self.config['slaves'][slave_id]['port'] if not is_master else self.config['master']['port']
         self.master_stub = None
 
+        # Initialize
+        self.initialize(self.config["master"]["ip"], self.config["master"]["port"])
+
+    # Initialize the node
+    def initialize(self, ip, port):
         # save the  master in the list
         self.nodes.append(Node(self.id, self.ip, self.port))
 
         # Connect to master:
-        if not is_master:
+        if not self.is_master:
             # Open a gRPC channel
-            channel = grpc.insecure_channel(f'{self.config["master"]["ip"]}:{self.config["master"]["port"]}')
+            channel = grpc.insecure_channel(f'{ip}:{port}')
             # Create a stub to the master
             self.master_stub = center_pb2_grpc.InternalProtocolStub(channel)
             self.send_info()
 
+            self.all_nodes = list()
+
+            for nd in self.config['slaves']:
+                self.all_nodes.append(Node(nd['id'], nd['ip'], nd['port']))
+
+
+    # Load config data yaml file
     def load_config(self):
 
         config_path = os.path.dirname(os.path.abspath(__file__)) + '/../centralized_config.yaml'
         with open(config_path, 'r') as file:
             return yaml.safe_load(file)
 
+    # Ping method to check if the node is alive
+    def ping(self, request, context):
+        return center_pb2.PingResponse()
+
+    # Assigning new master
+    def newMaster(self, request, context):
+        # Register new master
+        self.initialize(request.ip, request.port)
+
+        # Send The response
+        response = center_pb2.newMasterResponse(ack=True)
+
+        return response
+
+
     # Save Key-value
     def put(self, request, context):
         # Add delay
         time.sleep(self.delay)
+
+        response = store_pb2.PutResponse(success=False)
 
         # Check if this node is the master, otherwise do not save any data in the Storage
         if self.is_master:
@@ -80,12 +110,38 @@ class StorageServiceServicer(store_pb2_grpc.KeyValueStore, center_pb2_grpc.Inter
                 response = store_pb2.PutResponse(success=success)
             except grpc.RpcError as e:
                 # Some Node is down
-                pass
 
+                for node in self.nodes:
+                    try:
+                        res = node.stub.ping(center_pb2.PingRequest())
+                    except Exception as e:
+                        self.nodes.remove(node)
+
+                response = store_pb2.PutResponse(success=False)
 
         else:
+
+            # We have to check if the master is alive
+            try:
+                res = self.master_stub.ping(center_pb2.PingRequest())
+
+
+            except Exception as e:
+                # Notify all nodes that I am the new master
+                self.multicastNewMaster()
+                # Send vote request to all nodes
+                vote = self.multicastCanCommit()
+
+                if vote:
+                    # If they all agree we send a do commit
+                    success = self.multicastDoCommit(request.key, request.value)
+                else:
+                    success = False
+
+                response = store_pb2.PutResponse(success=success)
+
             # We can not accept put requests in a slave node
-            response = store_pb2.PutResponse(success=False)
+
 
         return response
 
@@ -119,6 +175,22 @@ class StorageServiceServicer(store_pb2_grpc.KeyValueStore, center_pb2_grpc.Inter
         response = store_pb2.SlowDownResponse(success=True)
 
         return response
+
+    # Multicast The new master
+    def multicastNewMaster(self):
+
+        # Set master var to true
+        self.master = True
+
+        # for each node of list of nodes
+        for node in self.all_nodes:
+            try:
+                # Send a request tell them that there is a new master
+                req = center_pb2.newMasterRequest(id=self.id, ip=self.ip, port=self.port)
+                res = node.stub.newMaster(req)
+            except Exception as e:
+                # If there is an error just skip
+                pass
 
     # Remove the slowdown delay
     def restore(self, request, context):
