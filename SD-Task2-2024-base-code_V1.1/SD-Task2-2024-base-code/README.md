@@ -2,7 +2,7 @@
 
 ```
 SD_PRACTICA2/
-├── _¿pycache?_
+├── _pycache_
 |
 ├── eval/
 |   ├── _pycache_

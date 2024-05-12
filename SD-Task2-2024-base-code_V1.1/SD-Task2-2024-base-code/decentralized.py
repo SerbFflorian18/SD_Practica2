@@ -5,7 +5,7 @@ import os
 import pickle
 import grpc # type: ignore
 from grpc.experimental import aio as grpc_aio  # type: ignore
-#python -m grpc_tools.protoc -I./ --python_out=. --grpc_python_out=. ./store.proto
+
 #python .\eval\decentralized_system_tests.py
 #python .\decentralized.py
 #source .venv/bin/activate

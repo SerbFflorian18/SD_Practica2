@@ -1,5 +1,7 @@
 syntax = "proto3";
-
+/** 
+* python -m grpc_tools.protoc -I./ --python_out=. --grpc_python_out=. ./store.proto
+**/
 package distributedstore;
 
 // Message defining information about a node in the system
