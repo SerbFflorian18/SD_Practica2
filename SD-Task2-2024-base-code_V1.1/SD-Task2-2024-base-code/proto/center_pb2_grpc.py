@@ -64,6 +64,11 @@ class InternalProtocolStub(object):
                 request_serializer=center__pb2.PingRequest.SerializeToString,
                 response_deserializer=center__pb2.PingResponse.FromString,
                 _registered_method=True)
+        self.newMaster = channel.unary_unary(
+                '/InternalProtocol/newMaster',
+                request_serializer=center__pb2.newMasterRequest.SerializeToString,
+                response_deserializer=center__pb2.newMasterResponse.FromString,
+                _registered_method=True)
 
 
 class InternalProtocolServicer(object):
@@ -99,6 +104,12 @@ class InternalProtocolServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def newMaster(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
 
 def add_InternalProtocolServicer_to_server(servicer, server):
     rpc_method_handlers = {
@@ -126,6 +137,11 @@ def add_InternalProtocolServicer_to_server(servicer, server):
                     servicer.ping,
                     request_deserializer=center__pb2.PingRequest.FromString,
                     response_serializer=center__pb2.PingResponse.SerializeToString,
+            ),
+            'newMaster': grpc.unary_unary_rpc_method_handler(
+                    servicer.newMaster,
+                    request_deserializer=center__pb2.newMasterRequest.FromString,
+                    response_serializer=center__pb2.newMasterResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -262,6 +278,33 @@ class InternalProtocol(object):
             '/InternalProtocol/ping',
             center__pb2.PingRequest.SerializeToString,
             center__pb2.PingResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def newMaster(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/InternalProtocol/newMaster',
+            center__pb2.newMasterRequest.SerializeToString,
+            center__pb2.newMasterResponse.FromString,
             options,
             channel_credentials,
             insecure,

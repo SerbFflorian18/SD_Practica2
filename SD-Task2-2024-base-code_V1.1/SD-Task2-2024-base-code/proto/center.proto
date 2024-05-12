@@ -6,6 +6,7 @@ service InternalProtocol{
   rpc doCommit(doCommitRequest) returns (doCommitResponse);
   rpc doAbort(doAbortRequest) returns (doAbortResponse);
   rpc ping(PingRequest) returns (PingResponse);
+  rpc newMaster(newMasterRequest) returns (newMasterResponse);
 
 }
 
@@ -50,3 +51,14 @@ message doAbortResponse{
 // Define request and response messages
 message PingRequest {}
 message PingResponse {}
+
+// Define Assigning new master
+message newMasterRequest{
+  int32 id = 1;
+  string ip = 2;
+  int32 port = 3;
+}
+
+message newMasterResponse{
+  bool ack = 1;
+}
