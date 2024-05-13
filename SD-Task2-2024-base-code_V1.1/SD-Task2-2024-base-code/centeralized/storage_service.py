@@ -3,8 +3,10 @@ import pickle
 
 class StorageService:
     def __init__(self):
+        # Data base object
         self.database = dict()
         try:
+            # Try restoring data from the file
             self.restore()
         except FileNotFoundError:
             pass
@@ -13,6 +15,7 @@ class StorageService:
     def save(self, key, value):
         try:
             self.database[key] = value
+            # Save the data to the file
             self.dump()
             success = True
         except:
@@ -41,7 +44,7 @@ class StorageService:
     def restore(self):
         with open("storage.pickle", "rb") as f:
             loaded = pickle.load(f)
-            self.database  = loaded
+            self.database = loaded
 
 
 

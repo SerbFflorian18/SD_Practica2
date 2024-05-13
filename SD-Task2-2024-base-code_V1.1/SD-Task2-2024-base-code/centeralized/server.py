@@ -62,9 +62,9 @@ class StorageServiceServicer(store_pb2_grpc.KeyValueStore, center_pb2_grpc.Inter
 
             self.all_nodes = list()
 
+            # Save all nodes to the list
             for nd in self.config['slaves']:
                 self.all_nodes.append(Node(nd['id'], nd['ip'], nd['port']))
-
 
     # Load config data yaml file
     def load_config(self):
@@ -111,7 +111,7 @@ class StorageServiceServicer(store_pb2_grpc.KeyValueStore, center_pb2_grpc.Inter
             except grpc.RpcError as e:
                 # Some Node is down
 
-                for node in self.nodes:
+                for node in self.nodes:     # Check which node is down
                     try:
                         res = node.stub.ping(center_pb2.PingRequest())
                     except Exception as e:
@@ -142,11 +142,10 @@ class StorageServiceServicer(store_pb2_grpc.KeyValueStore, center_pb2_grpc.Inter
 
             # We can not accept put requests in a slave node
 
-
         return response
 
+    # Save data in the database
     def save(self, key, value):
-        # Tem function
         success = self.storage.save(key, value)
         return success
 
@@ -254,17 +253,18 @@ class StorageServiceServicer(store_pb2_grpc.KeyValueStore, center_pb2_grpc.Inter
     def multicastCanCommit(self):
         with concurrent.futures.ThreadPoolExecutor(max_workers=3) as executor:
             fs = list()
-            for node in self.nodes:
-                req = center_pb2.canCommitRequest()
-                future = executor.submit(node.stub.canCommit, req)
+            for node in self.nodes:     # for each node
+                req = center_pb2.canCommitRequest()     # Send a request
+                future = executor.submit(node.stub.canCommit, req)  # get the future
                 fs.append(future)
 
-            concurrent.futures.wait(fs)
+            concurrent.futures.wait(fs)     # Wait for all responses
             # Get The vote results
             res = list(map(lambda x: x.result().ack, fs))
             votes = True
+            # Check if all votes are true
             for v in res:
-                if not v:
+                if not v:   # If there is a false vote Abort
                     votes = False
                     break
 
@@ -281,18 +281,19 @@ class StorageServiceServicer(store_pb2_grpc.KeyValueStore, center_pb2_grpc.Inter
 
         # canCommit grpc
 
+    # Send a doCommit to all users
     def multicastDoCommit(self, key, value):
         # Add delay
         time.sleep(self.delay)
 
         with concurrent.futures.ThreadPoolExecutor(max_workers=3) as executor:
             fs = list()
-            for node in self.nodes:
-                req = center_pb2.doCommitRequest(key=key, value=value)
+            for node in self.nodes:     # for each node
+                req = center_pb2.doCommitRequest(key=key, value=value)  # Send request
                 future = executor.submit(node.stub.doCommit, req)
                 fs.append(future)
 
-            concurrent.futures.wait(fs)
+            concurrent.futures.wait(fs)     # Wait for all responses
             # Get The vote results
             res = list(map(lambda x: x.result().ack, fs))
             votes = True
@@ -302,26 +303,15 @@ class StorageServiceServicer(store_pb2_grpc.KeyValueStore, center_pb2_grpc.Inter
                     break
 
         return votes
+
+    # Accept commit and sava data in the database
     def doCommit(self, request, context):
 
         # Add delay
         time.sleep(self.delay)
 
+        # Accept commit
         state = self.save(request.key, request.value)
-
-        #print("Committed")
 
         response = center_pb2.doCommitResponse(ack=state)
         return response
-
-
-# test a node
-# node = StorageServiceServicer(True, 0)
-# node.start_server()
-# # since server.start() will not block,
-# # a sleep-loop is added to keep alive
-# try:
-#     while True:
-#         time.sleep(86400)
-# except KeyboardInterrupt:
-#     node.server.stop(0)
