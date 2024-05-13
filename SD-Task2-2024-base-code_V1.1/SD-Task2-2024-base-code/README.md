@@ -13,8 +13,22 @@ SD_PRACTICA2/
 ├── proto/
 |   ├── _pycache_
 │   ├── store.proto
+|   ├── center.proto
 │   ├── store_pb2.py
 │   └── store_pb2_grpc.py
+|
+├── centeralized/
+|   ├── server.py
+│   ├── storage_service.py
+│   └── test_client.py
+|
+|
+├── decentralized/
+|   ├── client.py
+│   ├── discoveryServicer.py
+│   └── proto/
+|       └── desc.proto
+|
 |
 ├── centralized_config.yaml
 ├── centralized.py
